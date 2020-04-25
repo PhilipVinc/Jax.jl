@@ -1,0 +1,13 @@
+name = "Jax"
+uuid = "1731ae6b-700c-42e1-9919-538f08b7903b"
+authors = ["Filippo Vicentini <filippovicentini@gmail.com>"]
+version = "0.1.0"
+
+[compat]
+julia = "1"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]
