@@ -82,7 +82,7 @@ jaxfunc(::typeof(Base.:(^))) = np.power
 # test
 using MacroTools
 
-const _jaxfuncs = [copy(libdevice); :^]
+const _jaxfuncs = [copy(libdevice); :^; copy(overridenbfuncs)]
 jaxfuncs() = (global _jaxfuncs; _jaxfuncs)
 
 _jaxint(x::Int) = Int32(x)#JaxArray{Int32,0}(Jax.np.int32(x), tuple())
