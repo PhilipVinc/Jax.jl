@@ -1,5 +1,5 @@
 
-struct JaxArray{T,N} <: AbstractArray{T,N}
+struct JaxArray{T,N} <: AbstractJaxArray{T,N}
   o::PyObject
   dims::NTuple{N,Int}
 end
@@ -31,8 +31,10 @@ Base.eltype(a::JaxArray{T}) where {T} = T
 Base.axes(a::JaxArray) = map(Base.OneTo, size(a))
 
 PyCall.PyObject(a::JaxArray) = a.o
-Base.convert(::Type{JaxArray}, o::PyObject) = JaxArray(o)
+Base.convert(::Type{<:JaxArray}, o::PyObject) = JaxArray(o)
 
+_values(a::JaxArray) = PyArray_ReadOnly(a.o._value)
+Base.collect(a::JaxArray) = copy(_values(a))
 
 # linalg special
 function Base.transpose(a::JaxArray{T,N}) where {T,N}
@@ -52,8 +54,6 @@ end
 Base.adjoint(a::JaxArray{T}) where {T<:Real} = transpose(a)
 
 # show
-_values(a::JaxArray) = PyArray_ReadOnly(a.o._value)
-
 _szstr(d::Tuple{}) = "$(0)-dimensional"
 _szstr(d::Tuple{Int}) = "$(first(d))-element"
 _szstr(dims::Dims) = prod(["$i×" for i in dims])[1:end-1]
@@ -70,3 +70,6 @@ end
 
 # very slow
 # Base.getindex(a::JaxArray, args...) = (getindex(_values(a), args...))
+
+# iterators
+Base.eachrow(a::JaxArray) = (get(a.o, i-1) for i in axes(a, 1))
