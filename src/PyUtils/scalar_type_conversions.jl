@@ -1,14 +1,3 @@
-jl_to_np_type(o::PyObject) = np.bool_
-jl_to_np_type(o::Type{Bool}) = np.uint32
-jl_to_np_type(o::Type{UInt32}) = np.uint32
-jl_to_np_type(o::Type{UInt64}) = np.uint64
-jl_to_np_type(o::Type{Int32}) = np.int32
-jl_to_np_type(o::Type{Int64}) = np.int64
-jl_to_np_type(o::Type{Float32}) = np.float32
-jl_to_np_type(o::Type{Float64}) = np.float64
-jl_to_np_type(o::Type{ComplexF32}) = np.complex64
-jl_to_np_type(o::Type{ComplexF64}) = np.complex128
-
 function np_to_jl_type(o::PyObject)
     t = o.name
     if t == "float32"

@@ -1,7 +1,7 @@
 
-struct TracedArray{T,N} <: AbstractJaxArray{T,N}
-    o::PyObject
-    dims::NTuple{N,Int}
+mutable struct TracedArray{T,N} <: AbstractJaxArray{T,N}
+  o::PyObject
+  dims::NTuple{N,Int}
 end
 
 const TracedVector{T} = TracedArray{T,1}
@@ -11,7 +11,7 @@ function TracedArray(parr::PyObject)
   @assert pyisinstance(parr, jax.interpreters.partial_eval.JaxprTracer)
   aval = parr.aval
   T = np_to_jl_type(aval.dtype)
-  return TracedArray{T,length(aval.shape)}(parr, aval.shape)
+  return TracedArray{T,length(aval.shape)}(parr, reverse(aval.shape))
 end
 
 #TracedArray(d...) = TracedArray(Float32, d...)
@@ -19,7 +19,7 @@ end
 #TracedArray(T::Type{<:Number}, u::UndefInitializer, d::Integer...) =
 #  TracedArray(T, u, Dims(d))
 #function TracedArray(T::Type{<:Number}, u::UndefInitializer, d::Dims)
-#  return np.empty(d, dtype = jl_to_np_type(T))#JaxArray()
+#  return numpy.empty(d, dtype = jl_to_np_type(T))#JaxArray()
 #end
 
 Base.size(a::TracedArray) = a.dims
@@ -36,7 +36,7 @@ function Base.transpose(a::TracedArray{T,N}) where {T,N}
 end
 
 function Base.conj(a::TracedArray{T,N}) where {T,N}
-  TracedArray{T,N}(np.conj(a.o), size(a))
+  TracedArray{T,N}(numpy.conj(a.o), size(a))
 end
 
 function Base.adjoint(a::TracedArray{T,N}) where {T,N}
@@ -48,7 +48,7 @@ Base.adjoint(a::TracedArray{T}) where {T<:Real} = transpose(a)
 
 function Base.show(io::IO, ::MIME"text/plain", a::TracedArray{T,N}) where {T,N}
   println(io, "$(_szstr(a.dims)) Traced{JaxArray{$T,$N}}:")
-  print(io, " ",a.o)
+  print(io, " ", a.o)
 end
 
 function Base.show(io::IO, a::TracedArray{T,N}) where {T,N}

@@ -1,5 +1,5 @@
 
-struct JVPTracerArray{T,N} <: AbstractJaxArray{T,N}
+mutable struct JVPTracerArray{T,N} <: AbstractJaxArray{T,N}
   o::PyObject
   dims::NTuple{N,Int}
 end
@@ -11,7 +11,7 @@ function JVPTracerArray(parr::PyObject)
   @assert pyisinstance(parr, jax.interpreters.ad.JVPTracer)
   aval = parr.aval
   T = np_to_jl_type(aval.dtype)
-  return JVPTracerArray{T,length(aval.shape)}(parr, aval.shape)
+  return JVPTracerArray{T,length(aval.shape)}(parr, reverse(aval.shape))
 end
 
 Base.size(a::JVPTracerArray) = a.dims
@@ -28,7 +28,7 @@ function Base.transpose(a::JVPTracerArray{T,N}) where {T,N}
 end
 
 function Base.conj(a::JVPTracerArray{T,N}) where {T,N}
-  JVPTracerArray{T,N}(np.conj(a.o), size(a))
+  JVPTracerArray{T,N}(numpy.conj(a.o), size(a))
 end
 
 function Base.adjoint(a::JVPTracerArray{T,N}) where {T,N}

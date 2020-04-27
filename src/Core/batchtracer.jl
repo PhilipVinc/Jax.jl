@@ -1,5 +1,5 @@
 
-struct BatchTracerArray{T,N} <: AbstractJaxArray{T,N}
+mutable struct BatchTracerArray{T,N} <: AbstractJaxArray{T,N}
   o::PyObject
   dims::NTuple{N,Int}
 end
@@ -11,16 +11,8 @@ function BatchTracerArray(parr::PyObject)
   @assert pyisinstance(parr, jax.interpreters.batching.BatchTracer)
   aval = parr.aval
   T = np_to_jl_type(aval.dtype)
-  return BatchTracerArray{T,length(aval.shape)}(parr, aval.shape)
+  return BatchTracerArray{T,length(aval.shape)}(parr, reverse(aval.shape))
 end
-
-#TracedArray(d...) = TracedArray(Float32, d...)
-#TracedArray(T::Type{<:Number}, d...) = TracedArray(T, undef, d...)
-#TracedArray(T::Type{<:Number}, u::UndefInitializer, d::Integer...) =
-#  TracedArray(T, u, Dims(d))
-#function TracedArray(T::Type{<:Number}, u::UndefInitializer, d::Dims)
-#  return np.empty(d, dtype = jl_to_np_type(T))#JaxArray()
-#end
 
 Base.size(a::BatchTracerArray) = a.dims
 Base.length(a::BatchTracerArray) = prod(a.dims)
@@ -36,7 +28,7 @@ function Base.transpose(a::BatchTracerArray{T,N}) where {T,N}
 end
 
 function Base.conj(a::BatchTracerArray{T,N}) where {T,N}
-  BatchTracerArray{T,N}(np.conj(a.o), size(a))
+  BatchTracerArray{T,N}(numpy.conj(a.o), size(a))
 end
 
 function Base.adjoint(a::BatchTracerArray{T,N}) where {T,N}

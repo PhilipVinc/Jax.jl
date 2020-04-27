@@ -3,63 +3,54 @@
 jaxfunc(f) = f
 jaxfunc(::Type{T}) where {T} = (x...) -> T(x...) # broadcasting type ctors isn't GPU compatible
 
-const libdevice =
-    :[
-        cos,
-        cospi,
-        sin,
-        sinpi,
-        tan,
-        acos,
-        asin,
-        atan,
-        cosh,
-        sinh,
-        tanh,
-        acosh,
-        asinh,
-        atanh,
-        log,
-        log10,
-        log1p,
-        log2,
-        logb,
-        ilogb,
-        exp,
-        exp2,
-        exp10,
-        expm1,
-        ldexp,
-        erf,
-        erfinv,
-        erfc,
-        erfcinv,
-        erfcx,
-    ].args
+const libdevice = Dict(
+#complex
+:abs=>:abs,
+:angle=>:angle,
+:conj=>:conj,
+:real=>:real, :imag=>:imag,
+#trig
+:cos=>:cos, :cosh=>:cosh,
+:acos=>:arccos, :acosh=>:arccosh,
+:sin=>:sin, :sinh=>:sinh,
+:asin=>:arcsin, :asinh=>:arcsinh,
+:tan=>:tan, :tanh=>:tanh,
+:atan=>:arctan, :atanh=>:arctanh,
+#
+:ceil=>:ceil, :floor=>:floor,
+#math
+:exp=>:exp, :expm1=>:expm1,
+:log=>:log, :log1p=>:log1p, :log10=>:log10, :log2=>:log2,
+:sqrt=>:sqrt,
+#comparison
+:(==)=>:equal
+)
 
-for f in libdevice
-    isdefined(Base, f) || continue
-    @eval jaxfunc(::typeof(Base.$f)) = np.$f
-    #@eval Base.$f(x::AbstractJaxArray) = np.$f(x)
+for (f_jl, f_np) in libdevice
+    isdefined(Base, f_jl) || continue
+    @eval jaxfunc(::typeof(Base.$f_jl)) = numpy.$f_np
+    #@eval Base.$f(x::AbstractJaxArray) = $f(x)
 end
 
-jaxliteral_pow(::typeof(^), x::T, ::Val{0}) where {T<:Real} = one(x)
-jaxliteral_pow(::typeof(^), x::T, ::Val{1}) where {T<:Real} = x
-jaxliteral_pow(::typeof(^), x::T, ::Val{2}) where {T<:Real} = x * x
-jaxliteral_pow(::typeof(^), x::T, ::Val{3}) where {T<:Real} = x * x * x
-jaxliteral_pow(::typeof(^), x::T, ::Val{p}) where {T<:Real,p} =
-    np.power(x, Int32(p))
+jaxliteral_pow(::typeof(^), x::AbstractJaxArray, ::Val{0}) = one(x)
+jaxliteral_pow(::typeof(^), x::AbstractJaxArray, ::Val{1}) = x
+jaxliteral_pow(::typeof(^), x::AbstractJaxArray, ::Val{2}) = x * x
+jaxliteral_pow(::typeof(^), x::AbstractJaxArray, ::Val{3}) = x * x * x
+jaxliteral_pow(::typeof(^), x::AbstractJaxArray, ::Val{p}) where p = numpy.power(x, Int32(p))
+
+# ??
+jaxliteral_pow(::Base.RefValue{typeof(^)}, x::AbstractJaxArray, ::Base.RefValue{Val{p}}) where p = numpy.power(x, Int32(p))
 
 jaxfunc(::typeof(Base.literal_pow)) = jaxliteral_pow
-jaxfunc(::typeof(Base.:(^))) = np.power
+jaxfunc(::typeof(Base.:(^))) = power
 
 # test
 using MacroTools
 
-const _jaxfuncs = [copy(libdevice); :^; copy(overridenbfuncs)]
+const _jaxfuncs = [keys(libdevice); :^; copy(overridenbfuncs)]
 jaxfuncs() = (global _jaxfuncs; _jaxfuncs)
 
-_jaxint(x::Int) = Int32(x)#JaxArray{Int32,0}(Jax.np.int32(x), tuple())
+_jaxint(x::Int) = Int32(x)#JaxArray{Int32,0}(Jax.int32(x), tuple())
 _jaxint(x::Expr) = x.head == :call && x.args[1] == :Int32 && x.args[2] isa Int ?
     Int32(x.args[2]) : x
 _jaxint(x) = x

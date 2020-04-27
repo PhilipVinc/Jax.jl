@@ -1,5 +1,5 @@
 
-struct ParallelTracerArray{T,N} <: AbstractJaxArray{T,N}
+mutable struct ParallelTracerArray{T,N} <: AbstractJaxArray{T,N}
   o::PyObject
   dims::NTuple{N,Int}
 end
@@ -11,7 +11,7 @@ function ParallelTracerArray(parr::PyObject)
   @assert pyisinstance(parr, jax.interpreters.parallel.PapplyTracer)
   aval = parr.aval
   T = np_to_jl_type(aval.dtype)
-  return ParallelTracerArray{T,length(aval.shape)}(parr, aval.shape)
+  return ParallelTracerArray{T,length(aval.shape)}(parr, reverse(aval.shape))
 end
 
 Base.size(a::ParallelTracerArray) = a.dims
@@ -28,7 +28,7 @@ function Base.transpose(a::ParallelTracerArray{T,N}) where {T,N}
 end
 
 function Base.conj(a::ParallelTracerArray{T,N}) where {T,N}
-  ParallelTracerArray{T,N}(np.conj(a.o), size(a))
+  ParallelTracerArray{T,N}(numpy.conj(a.o), size(a))
 end
 
 function Base.adjoint(a::ParallelTracerArray{T,N}) where {T,N}

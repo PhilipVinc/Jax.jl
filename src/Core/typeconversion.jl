@@ -1,0 +1,10 @@
+jl_to_np_type(o::PyObject) = numpy.bool_
+jl_to_np_type(o::Type{Bool}) = numpy.uint32
+jl_to_np_type(o::Type{UInt32}) = numpy.uint32
+jl_to_np_type(o::Type{UInt64}) = numpy.uint64
+jl_to_np_type(o::Type{Int32}) = numpy.int32
+jl_to_np_type(o::Type{Int64}) = numpy.int64
+jl_to_np_type(o::Type{Float32}) = numpy.float32
+jl_to_np_type(o::Type{Float64}) = numpy.float64
+jl_to_np_type(o::Type{ComplexF32}) = numpy.complex64
+jl_to_np_type(o::Type{ComplexF64}) = numpy.complex128
