@@ -6,6 +6,9 @@ DefaultJaxArrayStyle{M}(::Val{N}) where {N,M} = DefaultJaxArrayStyle{N}()
 Broadcast.BroadcastStyle(::Type{<:AbstractJaxArray{T,N}}) where {T,N} =
     DefaultJaxArrayStyle{N}()
 
+_BroadcastStyle(::Type{<:AbstractArray{T,N}}) where {T,N} = DefaultJaxArrayStyle{N}()
+Base.convert(::Type{<:DefaultJaxArrayStyle}, a::Broadcast.DefaultArrayStyle{M}) where M = DefaultJaxArrayStyle{M}()
+
 # When broadcasting with Jax replace Julia functions with jax functions
 Base.broadcasted(::JAS, f, args...) where {JAS<:JaxAbstractArrayStyle} =
     Broadcast.Broadcasted{JAS}(jaxfunc(f), args, nothing)
@@ -16,7 +19,7 @@ _pyconvert(o::AbstractJaxArray) = o
 # Outermost layer of materialization. Convert the result of recursive inner
 # _materialize calls
 Broadcast.materialize(bc::Broadcast.Broadcasted{<:JaxAbstractArrayStyle}) =
-    _pyconvert(_materialize(bc)) #convert(PyAny, _materialize(bc))
+    _pyconvert(_materialize(Broadcast.instantiate(bc)))
 
 # Standard things, go back to Base
 _materialize(bc::Broadcast.Broadcasted) = Base.materialize(bc)
@@ -25,11 +28,9 @@ _materialize(bc::Broadcast.Broadcasted) = Base.materialize(bc)
 _materialize(bc) = bc
 
 # Jax stuff, go to python
-_materialize(bc::Broadcast.Broadcasted{<:JaxAbstractArrayStyle}) =
-    __pymaterialize(bc)
+_materialize(bc::Broadcast.Broadcasted{<:JaxAbstractArrayStyle}) = __pymaterialize(Broadcast.instantiate(bc))
 
-__pymaterialize(bc::Broadcast.Broadcasted) = bc.f(map(_materialize, bc.args)...)
-
+__pymaterialize(bc::Broadcast.Broadcasted)  = bc.f(map(_materialize, bc.args)...)
 
 # Jax correctly preserves 0-dim objects
 Base.broadcast_preserving_zero_d(f, As::AbstractJaxArray...) =

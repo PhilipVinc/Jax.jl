@@ -44,7 +44,7 @@ for op in overridenbfuncs
     end
 end
 
-#PyCall.pycall(::typeof(identity), ::Type, arg1) = convert(T, arg1)
+@eval _pmul = $(Symbol("_", :*))
 
 @eval $(Symbol("_", :-))(a::T) where {T<:AbstractJaxArray} = convert(T, -(a.o))
 @eval $(Symbol("_", :+))(a::T) where {T<:AbstractJaxArray} = convert(T, +(a.o))
