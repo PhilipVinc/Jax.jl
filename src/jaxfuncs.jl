@@ -63,9 +63,12 @@ function _jaxpowliteral(x::Expr)
             new_x = Expr(:block, :($sym = $(x.args[2])))
 
             if iszero(num)
-                push!(new_x.args, :(one($sym)))
+                #push!(new_x.args, :(one($sym)))
+                push!(new_x.args, :(one(eltype($sym))))
+            elseif isone(num)
+                push!(new_x.args, sym)
             else
-                unroll = Expr(:call, :*)
+                unroll = Expr(:call, :(Jax.jaxfunc(*)))
                 for x = one(num):num
                     push!(unroll.args, sym)
                 end
@@ -82,9 +85,9 @@ _jaxpowliteral(x) = x
 function replace_device(ex)
     global _jaxfuncs
     MacroTools.postwalk(ex) do x
+        x = _jaxpowliteral(x)
         x = x in _jaxfuncs ? :(Jax.jaxfunc($x)) : x
         x = _jaxint(x)
-        x = _jaxpowliteral(x)
         x
     end
 end

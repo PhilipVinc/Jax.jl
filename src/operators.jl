@@ -35,6 +35,9 @@ for op in overridenbfuncs
 
         $fname(a::AbstractJaxArray, b::AbstractJaxArray) = convert(PyAny, $op(a.o, b.o))
 
+        # for many arguments like *(1,2,3)
+        ($fname)(a, b, c, xs...) = Base.afoldl($fname, ($fname)(($fname)(a,b),c), xs...)
+
         jaxfunc(::typeof(Base.$op)) = $fname
 
         PyCall.pycall(::typeof($fname), ::Type, arg1, arg2) = $fname(arg1, arg2)
