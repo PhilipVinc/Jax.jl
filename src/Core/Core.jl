@@ -1,5 +1,6 @@
 module Core
     using ..PyUtils
+    using LinearAlgebra
 
     export AbstractJaxArray, AbstractJaxVector, AbstractJaxMatrix
     export JaxAbstractArrayStyle
@@ -22,6 +23,8 @@ module Core
     include("batchtracer.jl")
     include("JVPTracer.jl")
     include("ParallelTracer.jl")
+
+    include("indexing.jl")
 
     include("typeconversion.jl")
 

@@ -30,22 +30,6 @@ Base.axes(a::TracedArray) = map(Base.OneTo, size(a))
 PyCall.PyObject(a::TracedArray) = a.o
 Base.convert(::Type{<:TracedArray}, o::PyObject) = TracedArray(o)
 
-function Base.transpose(a::TracedArray{T,N}) where {T,N}
-  po = a.o.transpose()
-  return TracedArray{T,N}(po, po.aval.shape)
-end
-
-function Base.conj(a::TracedArray{T,N}) where {T,N}
-  TracedArray{T,N}(numpy.conj(a.o), size(a))
-end
-
-function Base.adjoint(a::TracedArray{T,N}) where {T,N}
-  po = a.o.transpose().conj()
-  TracedArray{T,N}(po, po.aval.shape)
-end
-
-Base.adjoint(a::TracedArray{T}) where {T<:Real} = transpose(a)
-
 function Base.show(io::IO, ::MIME"text/plain", a::TracedArray{T,N}) where {T,N}
   println(io, "$(_szstr(a.dims)) Traced{JaxArray{$T,$N}}:")
   print(io, " ", a.o)

@@ -38,31 +38,14 @@ Base.axes(a::JaxArray) = map(Base.OneTo, size(a))
 PyCall.PyObject(a::JaxArray) = a.o
 Base.convert(::Type{<:JaxArray}, o::PyObject) = JaxArray(o)
 
-_values(a::JaxArray) = PyArray_ReadOnly(a.o._value) |>transpose
+_transpose(x::Union{AbstractVector,AbstractMatrix}) = transpose(x)
+_transpose(x::AbstractArray{T,N}) where {T,N} = permutedims(x, reverse(1:N))
+
+_values(a::JaxArray) = PyArray_ReadOnly(a.o._value) |>_transpose
 _values(a::JaxArray{T,0}) where T = PyArray_ReadOnly(a.o._value)
 _values(a::JaxArray{T,1}) where T = PyArray_ReadOnly(a.o._value)
 Base.collect(a::JaxArray) = copy(_values(a))
 Base.convert(::Type{<:Array}, a::JaxArray) = copy(_values(a))
-
-# linalg special
-function Base.transpose(a::JaxArray{T,N}) where {T,N}
-  #po = a.o.transpose()
-  #return JaxArray{T,N}(po, po.shape)
-  a.o.transpose()
-end
-
-function Base.conj(a::JaxArray{T,N}) where {T,N}
-  #JaxArray{T,N}(numpy.conj(a.o), size(a))
-  numpy.conj(a.o)
-end
-
-function Base.adjoint(a::JaxArray{T,N}) where {T,N}
-  #po = a.o.transpose().conj()
-  #JaxArray{T,N}(po, po.shape)
-  a.o.transpose().conj()
-end
-
-Base.adjoint(a::JaxArray{T}) where {T<:Real} = transpose(a)
 
 # show
 _szstr(d::Tuple{}) = "$(0)-dimensional"
@@ -87,13 +70,6 @@ function Base.show(io::IO, m::MIME"text/plain", a::JaxArray{T,N}) where {T,N}
       println(io)
   end
 
-  # 2) update typeinfo
-  #
-  # it must come after printing the summary, which can exploit :typeinfo itself
-  # (e.g. views)
-  # we assume this function is always called from top-level, i.e. that it's not nested
-  # within another "show" method; hence we always print the summary, without
-  # checking for current :typeinfo (this could be changed in the future)
   io = IOContext(io, :typeinfo => eltype(a))
 
   Base.print_array(io, _values(a))

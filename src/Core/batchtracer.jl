@@ -22,22 +22,6 @@ Base.axes(a::BatchTracerArray) = map(Base.OneTo, size(a))
 PyCall.PyObject(a::BatchTracerArray) = a.o
 Base.convert(::Type{<:BatchTracerArray}, o::PyObject) = BatchTracerArray(o)
 
-function Base.transpose(a::BatchTracerArray{T,N}) where {T,N}
-  po = a.o.transpose()
-  return BatchTracerArray{T,N}(po, po.aval.shape)
-end
-
-function Base.conj(a::BatchTracerArray{T,N}) where {T,N}
-  BatchTracerArray{T,N}(numpy.conj(a.o), size(a))
-end
-
-function Base.adjoint(a::BatchTracerArray{T,N}) where {T,N}
-  po = a.o.transpose().conj()
-  BatchTracerArray{T,N}(po, po.aval.shape)
-end
-
-Base.adjoint(a::BatchTracerArray{T}) where {T<:Real} = transpose(a)
-
 function Base.show(io::IO, ::MIME"text/plain", a::BatchTracerArray{T,N}) where {T,N}
   println(io, "$(_szstr(a.dims)) BatchTracerArray{JaxArray{$T,$N}}:")
   print(io, " ", a.o)

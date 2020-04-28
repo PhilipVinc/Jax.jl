@@ -22,22 +22,6 @@ Base.axes(a::JVPTracerArray) = map(Base.OneTo, size(a))
 PyCall.PyObject(a::JVPTracerArray) = a.o
 Base.convert(::Type{<:JVPTracerArray}, o::PyObject) = JVPTracerArray(o)
 
-function Base.transpose(a::JVPTracerArray{T,N}) where {T,N}
-  po = a.o.transpose()
-  return JVPTracerArray{T,N}(po, po.aval.shape)
-end
-
-function Base.conj(a::JVPTracerArray{T,N}) where {T,N}
-  JVPTracerArray{T,N}(numpy.conj(a.o), size(a))
-end
-
-function Base.adjoint(a::JVPTracerArray{T,N}) where {T,N}
-  po = a.o.transpose().conj()
-  JVPTracerArray{T,N}(po, po.aval.shape)
-end
-
-Base.adjoint(a::JVPTracerArray{T}) where {T<:Real} = transpose(a)
-
 function Base.show(io::IO, ::MIME"text/plain", a::JVPTracerArray{T,N}) where {T,N}
   println(io, "$(_szstr(a.dims)) JVPTracerArray{JaxArray{$T,$N}}:")
   print(io, " ", a.o)
