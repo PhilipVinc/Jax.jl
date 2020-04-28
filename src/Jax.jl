@@ -2,6 +2,7 @@ module Jax
 
 using Adapt
 using Requires
+using LinearAlgebra
 
 export jax, np, JaxArray
 export block_until_ready
@@ -26,8 +27,12 @@ include("operators.jl")
 include("jaxfuncs.jl")
 include("broadcast.jl")
 
-include("statistics.jl")
-include("linalg.jl")
+include("lib/_common.jl")
+include("lib/array.jl")
+include("lib/base.jl")
+include("lib/linalg.jl")
+include("lib/mapreduce.jl")
+include("lib/statistics.jl")
 
 include("External/nnlib.jl")
 
@@ -40,5 +45,6 @@ end
 
 # adapt
 Adapt.adapt_storage(::Type{<:JaxArray}, xs::Array) = JaxArray(xs)
+Adapt.adapt_storage(::Type{<:Array}, xs::AbstractJaxArray) = convert(Array, xs)
 
 end # module
