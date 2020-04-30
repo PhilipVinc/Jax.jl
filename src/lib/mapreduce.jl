@@ -1,5 +1,5 @@
 
-for (op, fun) in ((:maximum, :max),(:minimum, :min))
+for (op, fun) in ((:maximum, :max), (:minimum, :min), (:prod, :prod), (:all, :all))
     isdefined(Base, op) || continue
     _op = Symbol("_", op)
     __op = Symbol("__", op)

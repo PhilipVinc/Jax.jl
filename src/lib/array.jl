@@ -8,3 +8,5 @@ Base.PermutedDimsArray(a::AbstractJaxArray, perm) = permutedims(a, perm)
 Base.permutedims(a::AbstractJaxArray) = transpose(a)
 Base.permutedims(a::AbstractJaxArray{T,N}, perm::Dims{N}) where {T,N} =
     numpy.transpose(a, reverse(N.-perm))
+
+Base.reshape(a::AbstractJaxArray, dims::Dims) = numpy.reshape(a, reverse(dims))

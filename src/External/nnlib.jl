@@ -18,3 +18,6 @@ NNlib.softmax(x::AbstractJaxArray; dims=1) =
 
 NNlib.logsoftmax(x::AbstractJaxArray; dims=1) =
     jax.nn.log_softmax(x, axis=_convert_dims(x, dims))
+
+NNlib.batched_mul(a::AbstractJaxArray, b::AbstractJaxArray) =
+  Core.jax.lax.batch_matmul(b, a)

@@ -25,8 +25,8 @@ for op in overridenbfuncs
 
     @eval begin
         $fname(a::T, b::T) where {T<:AbstractJaxArray} = convert(T, $op(a.o, b.o))
-        $fname(a::T, b) where {T<:AbstractJaxArray} = convert(PyAny, $op(a.o, PyObject(b)))
-        $fname(a, b::T) where {T<:AbstractJaxArray} = convert(PyAny, $op(PyObject(a), b.o))
+        $fname(a::T, b::Number) where {T<:AbstractJaxArray} = convert(PyAny, $op(a.o, (b)))
+        $fname(a::Number, b::T) where {T<:AbstractJaxArray} = convert(PyAny, $op((a), b.o))
 
         # If a tracer is applied to an JaxArray (a constant) then return a tracer.
         $fname(a::T, b::JaxArray) where {T<:AbstractJaxArray} = convert(T, $op(a.o, b.o))
