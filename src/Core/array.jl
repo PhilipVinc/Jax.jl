@@ -14,12 +14,15 @@ function JaxArray(arr::Array{T,N}) where {T,N}
   return numpy.array(arr)
 end
 
+JaxNumber(a::Number) = numpy.array(a)
+
 function JaxArray(parr::PyObject)
   if !pyisinstance(parr, jax.interpreters.xla.DeviceArray)
     error("It is not jax.interpreters.xla.DeviceArray but $parr ")
   end
   T = np_to_jl_type(parr.dtype)
-  return JaxArray{T,length(parr.shape)}(parr, reverse(parr.shape))
+  N = length(parr.shape)
+  return JaxArray{T,N}(parr, reverse(parr.shape))
 end
 
 JaxArray(d...) = JaxArray(Float32, d...)
@@ -85,6 +88,14 @@ function Base.show(io::IO, a::JaxArray{T,N}) where {T,N}
   end
 end
 
+function Base.show(io::IO, m::MIME"text/plain", a::JaxArray{Bool,0})
+  print(io, "JaxScalar{Bool}[$((first(_values(a)))==true)]")
+end
+
+function Base.show(io::IO, m::MIME"text/plain", a::JaxArray{T,0}) where T
+  print(io, "JaxScalar{$T}[$((first(_values(a))))]")
+end
+
 # very slow
 # Base.getindex(a::JaxArray, args...) = (getindex(_values(a), args...))
 
@@ -92,3 +103,17 @@ end
 Base.eachrow(a::JaxArray) = (get(a.o, i-1) for i in axes(a, 1))
 
 block_until_ready(a::JaxArray) = a.o.block_until_ready()
+
+##
+#=
+abstract type AbstractJaxNumber end
+
+mutable struct JaxNumber{T} <: AbstractJaxNumber
+  o::PyObject
+end
+
+function JaxNumber(n::Array{T,0}) where {T}
+  # When converting an array to Jax Array we transpose it.
+  return JaxNumber(numpy.array(n))
+end
+=#

@@ -97,4 +97,4 @@ end
     return xs
 end=#
 
-Base.setindex!(xs::AbstractJaxArray, v, i::Integer) = xs[i] = convert(eltype(xs), v)
+#Base.setindex!(xs::AbstractJaxArray, v, i::Integer) = xs[i] = convert(eltype(xs), v)

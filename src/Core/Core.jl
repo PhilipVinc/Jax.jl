@@ -2,15 +2,19 @@ module Core
     using ..PyUtils
     using LinearAlgebra
 
-    export AbstractJaxArray, AbstractJaxVector, AbstractJaxMatrix
+    export AbstractJaxArray, AbstractJaxScalar, AbstractJaxVector, AbstractJaxMatrix
+    export JaxNumber
     export JaxAbstractArrayStyle
     export jl_to_np_type
     export JaxArray
     export jax, numpy, lax
 
     abstract type AbstractJaxArray{T,N} <: AbstractArray{T,N} end
+    const AbstractJaxScalar{T} = AbstractJaxArray{T,0}
     const AbstractJaxVector{T} = AbstractJaxArray{T,1}
     const AbstractJaxMatrix{T} = AbstractJaxArray{T,2}
+
+    const JaxNumber = AbstractJaxScalar
 
     abstract type JaxAbstractArrayStyle{N} <: Base.Broadcast.AbstractArrayStyle{N} end
 
@@ -19,10 +23,10 @@ module Core
     const lax = PyNULL()
 
     include("array.jl")
-    include("traced.jl")
-    include("batchtracer.jl")
-    include("JVPTracer.jl")
-    include("ParallelTracer.jl")
+    include("tracers.jl")
+#    include("batchtracer.jl")
+#    include("JVPTracer.jl")
+#    include("ParallelTracer.jl")
 
     include("indexing.jl")
 
