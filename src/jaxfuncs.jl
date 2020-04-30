@@ -3,7 +3,7 @@
 jaxfunc(f) = f
 jaxfunc(::Type{T}) where {T} = (x...) -> T(x...) # broadcasting type ctors isn't GPU compatible
 
-const libdevice = Dict(
+const libdevice_1 = Dict(
 #complex
 :abs=>:abs,
 :angle=>:angle,
@@ -19,12 +19,25 @@ const libdevice = Dict(
 #
 :ceil=>:ceil, :floor=>:floor,
 #math
-:exp=>:exp, :expm1=>:expm1,
+:exp=>:exp, :expm1=>:expm1, :exp2=>:exp2,
 :log=>:log, :log1p=>:log1p, :log10=>:log10, :log2=>:log2,
-:sqrt=>:sqrt,
+:sqrt=>:sqrt, :inv=>:reciprocal)
+
+const libdevice_2 = Dict(
 #comparison
-:(==)=>:equal
+:(==)=>:equal, :!= => :not_equal,
+:> => :greater, :>= => :greater_equal,
+:< => :less, :<= => :less_equal,
 )
+
+#const libdevice_3 = Dict(
+#
+#)
+
+const libdevice = merge(libdevice_1,
+                        libdevice_2,
+                        #libdevice_3
+                        )
 
 for (f_jl, f_np) in libdevice
     isdefined(Base, f_jl) || continue

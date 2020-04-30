@@ -36,19 +36,20 @@ __pymaterialize(bc::Broadcast.Broadcasted)  = bc.f(map(_materialize, bc.args)...
 Base.broadcast_preserving_zero_d(f, As::AbstractJaxArray...) =
     Broadcast.materialize(Base.broadcasted(f, As...))
 
-
 ## inplace
 function Base.copyto!(
-    dest::AbstractJaxArray,
+    dest::AbstractJaxArray{T,N},
     bc::Broadcast.Broadcasted{Nothing},
-)
+) where {T,N}
     obj = __pymaterialize(bc)
+
+    indices = N!=0 ? jax.ops.index[:] : nothing
 
     o = pycall(
         jax.ops.index_update,
         PyObject,
         dest,
-        jax.ops.index[:],
+        indices,
         obj,
     )
 

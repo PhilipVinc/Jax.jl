@@ -4,7 +4,7 @@ using Adapt
 using Requires
 using LinearAlgebra
 
-export jax, np, JaxArray
+export jax, np, JaxArray, JaxNumber
 export block_until_ready
 export tojax
 
@@ -27,6 +27,8 @@ include("operators.jl")
 include("jaxfuncs.jl")
 include("broadcast.jl")
 
+include("scalars.jl")
+
 include("lib/_common.jl")
 include("lib/array.jl")
 include("lib/base.jl")
@@ -46,5 +48,6 @@ end
 # adapt
 Adapt.adapt_storage(::Type{<:JaxArray}, xs::Array) = JaxArray(xs)
 Adapt.adapt_storage(::Type{<:Array}, xs::AbstractJaxArray) = convert(Array, xs)
+convert_to_cpu(xs) = adapt(Array, xs)
 
 end # module
