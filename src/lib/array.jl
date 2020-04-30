@@ -10,3 +10,10 @@ Base.permutedims(a::AbstractJaxArray{T,N}, perm::Dims{N}) where {T,N} =
     numpy.transpose(a, reverse(N.-perm))
 
 Base.reshape(a::AbstractJaxArray, dims::Dims) = numpy.reshape(a, reverse(dims))
+
+##
+Base.similar(a::AbstractJaxArray, ::Type{T}, dims::Dims{N}) where {T,N} = JaxArray(T,dims)
+
+##
+Base.vcat(arrays::AbstractJaxVector...) = numpy.hstack(arrays)
+Base.hcat(arrays::AbstractJaxVector...) = numpy.vstack(arrays)

@@ -25,7 +25,6 @@ function Base.show(io::IO, a::TA) where {TA<:AbstractJaxTracer}
   print(io, "$(_szstr(a.dims)) $TA")
 end
 
-
 for name in (:TracedArray, :ParallelTracerArray, :JVPTracerArray, :BatchTracerArray)
   @eval begin
     struct $name{T,N} <: AbstractJaxTracer{T,N}

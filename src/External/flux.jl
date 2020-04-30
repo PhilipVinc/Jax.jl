@@ -26,7 +26,7 @@ jl_unflatten(f, x) = _unflatten(f, x)
 # it will register as a pytree node any wrapper of julia
 # objects.
 # It woudl be nice to internally dispatch on traits when calling
-jax.tree_util.register_pytree_node(
+TreeUtil.register_pytree_node(
     pytypeof(PyObject(identity)),
     jl_flatten,
     jl_unflatten,

@@ -21,7 +21,8 @@ const libdevice_1 = Dict(
 #math
 :exp=>:exp, :expm1=>:expm1, :exp2=>:exp2,
 :log=>:log, :log1p=>:log1p, :log10=>:log10, :log2=>:log2,
-:sqrt=>:sqrt, :inv=>:reciprocal)
+:sqrt=>:sqrt, :inv=>:reciprocal,
+:sign=>:sign)
 
 const libdevice_2 = Dict(
 #comparison
@@ -60,7 +61,7 @@ jaxfunc(::typeof(Base.:(^))) = power
 # test
 using MacroTools
 
-const _jaxfuncs = [keys(libdevice); :^; copy(overridenbfuncs)]
+const _jaxfuncs = [collect(keys(libdevice)); :^; copy(overridenbfuncs)]
 jaxfuncs() = (global _jaxfuncs; _jaxfuncs)
 
 _jaxint(x::Int) = Int32(x)#JaxArray{Int32,0}(Jax.int32(x), tuple())
