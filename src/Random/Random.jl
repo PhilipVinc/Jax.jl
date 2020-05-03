@@ -11,7 +11,7 @@ include("distributions.jl")
 include("wrappers.jl")
 
 function __init__()
-  copy!(_random, pyimport_conda("jax.random", "jax"))
+  copy!(_random, pyimport("jax.random"))
 end
 
 end

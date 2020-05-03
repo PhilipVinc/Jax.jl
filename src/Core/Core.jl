@@ -33,9 +33,9 @@ module Core
     include("typeconversion.jl")
 
     function __init__()
-        copy!(jax, pyimport_conda("jax", "jax"))
-        copy!(numpy, pyimport_conda("jax.numpy", "jax"))
-        copy!(lax, pyimport_conda("jax.lax", "jax"))
+        copy!(jax, pyimport("jax"))
+        copy!(numpy, pyimport("jax.numpy"))
+        copy!(lax, pyimport("jax.lax"))
 
         # Automatic conversion to JaxArray for return of PyCall calls
         pytype_mapping(jax.interpreters.xla.DeviceArray, JaxArray)
