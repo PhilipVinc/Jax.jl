@@ -25,7 +25,7 @@ function JaxArray(parr::PyObject)
   return JaxArray{T,N}(parr, reverse(parr.shape))
 end
 
-JaxArray(d...) = JaxArray(Float32, d...)
+JaxArray(d::Union{Integer,Dims}...) = JaxArray(Float32, d...)
 JaxArray(T::Type{<:Number}, d...) = JaxArray(T, undef, d...)
 JaxArray(T::Type{<:Number}, u::UndefInitializer, d::Integer...) =
   JaxArray(T, u, Dims(d))

@@ -1,7 +1,4 @@
-using .Flux: Flux, fmap, functor
-
-# like gpu() from flux
-tojax(m) = fmap(x -> adapt(JaxArray, x), m)
+using Functors: fmap, functor
 
 # Jax will recursively call this on any jl object (like jl_wrap<identity>)
 # until he gets only fundamental types out. THankfully, that's mostly

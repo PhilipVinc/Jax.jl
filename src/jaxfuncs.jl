@@ -118,3 +118,9 @@ macro jaxfunc(ex)
         Jax.jaxfunc(::typeof($(esc(f)))) = $(esc(def[:name]))
     end
 end
+
+for (op, fun) in libdevice_2
+    @eval begin
+        Base.$op(a::AbstractJaxArray, b::AbstractJaxArray) = numpy.all(numpy.$fun(a.o, b.o))
+    end
+end

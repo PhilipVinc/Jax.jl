@@ -38,6 +38,7 @@ include("lib/linalg.jl")
 include("lib/mapreduce.jl")
 include("lib/statistics.jl")
 
+include("External/functors.jl")
 include("External/nnlib.jl")
 
 include("jit.jl")
@@ -49,6 +50,9 @@ function __init__()
         include("External/flux.jl")
     end
 end
+
+# like gpu() from flux
+tojax(m) = fmap(x -> adapt(JaxArray, x), m)
 
 # adapt
 Adapt.adapt_storage(::Type{<:JaxArray}, xs::Array) = JaxArray(xs)

@@ -12,6 +12,12 @@ module TreeUtil
         return vals, f
     end
 
+    function _flatten end
+    function _unflatten end
+
+    jl_flatten(x) = _flatten(x)
+    jl_unflatten(f, x) = _unflatten(f, x)
+
     const _fwdfuncs = Dict(
         :Partial=>:Partial,
         :all_leaves=>:all_leaves,
@@ -39,5 +45,16 @@ module TreeUtil
 
     function __init__()
         copy!(_tree_util, jax.tree_util)
+
+
+        # This is an horrinble hack.
+        # it will register as a pytree node any wrapper of julia
+        # objects.
+        # It woudl be nice to internally dispatch on traits when calling
+        TreeUtil.register_pytree_node(
+            pytypeof(PyObject(identity)),
+            jl_flatten,
+            jl_unflatten,
+        )
     end
 end
