@@ -42,6 +42,6 @@ module Core
         pytype_mapping(jax.interpreters.partial_eval.JaxprTracer, TracedArray)
         pytype_mapping(jax.interpreters.batching.BatchTracer, BatchTracerArray)
         pytype_mapping(jax.interpreters.ad.JVPTracer, JVPTracerArray)
-        pytype_mapping(jax.interpreters.parallel.PapplyTracer, ParallelTracerArray)
+        #pytype_mapping(jax.interpreters.parallel.PapplyTracer, ParallelTracerArray)
     end
 end
